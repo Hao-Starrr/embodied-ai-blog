@@ -38,9 +38,11 @@ force，image，delta pose 都要输入，主干用resnet，三个输出头，�
 
 
 
-# VLAs
+# Manipulation
 
+## Residual Policy Learning
 
+从已有策略出发，学习一个残差函数（residual）来补偿其不足，从而得到更优的策略。从头学（RL）太慢、成功率太低（特别是稀疏奖励场景）。可惜都在仿真里。
 
 # 数据生成
 
@@ -178,6 +180,34 @@ action就是这里花哨的地方。如果你在视频中直接提取SE3，那�
 
 
 
+# 下肢
+
+## Feedback Control For Cassie With Deep Reinforcement Learning
+
+将Cassie反馈控制问题转化为 DRL 问题，在MuJoCo里跑PPO。直接把参考轨迹输入进电机做PD不太行，所以RL出一个model去预测残差，然后给电机做PD。
+
+不能直接跟踪，否则无法适应非线性、扰动、欠驱动等情况；不能直接输出目标角或力矩，否则学习难度大、动作不稳定。
+
+他们首先写了一个**传统的规则控制器**，让模拟中的 Cassie 稳定走两步；然后记录这段两步的状态序列（包括关节角、骨盆姿态等）；把这段数据 **拼接复制成一个长的参考轨迹**，作为模仿目标；RL过程中，policy 会把当前状态与这个参考轨迹中相应的目标状态进行对比，用于奖励和动作调整。因此他只会走路。
+
+
+
+## Residual Force Control for Agile Human Behavior Imitation and Extended Motion Synthesis
+
+在已有控制器（例如关节PD控制器）基础上，**再学一个 residual 力控制器来精调接触力与姿态变化**，从而提升运动表现。两阶段训练：1 使用传统 imitation learning 方式训练一个 PD controller 对齐参考轨迹（next token prediction，自监督训练即可），2 固定 PD 控制器，用PPO**训练 Residual Force Controller（RFC）**，以提升物理表现力、鲁棒性、动作幅度等。这样就可以耍杂技了。
+
+
+
+## I-CTRL: Imitation to Control Humanoid Robots Through Bounded Residual Reinforcement Learning
+
+**ImitationNet**给出**参考轨迹**，residual RL policy 控制增量然后PD执行（所有增量都必须在参考轨迹附近）。
+
+
+
+
+
+
+
 # 其他
 
 ## Differentiable Robot Rendering
@@ -191,3 +221,4 @@ action就是这里花哨的地方。如果你在视频中直接提取SE3，那�
 ## AVR: Active Vision-Driven Robotic Precision Manipulation with Viewpoint and Focal Length Optimization
 
 实时变焦增强遥操，提供显式的attention。
+
