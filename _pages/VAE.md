@@ -2,6 +2,8 @@
 layout: article
 title: VAE
 permalink: /vae/
+key: post-vae
+# comment: false 
 ---
 
 # 先看视频
